@@ -10,6 +10,12 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="countDownScreen"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="(modal)/intervalModal"
         options={{
           presentation: "modal",
