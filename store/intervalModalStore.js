@@ -1,9 +1,9 @@
 import { create } from "zustand";
 
 export const useIntervalStore = create((set) => ({
-  numInterval: 5,
-  timeIntervalH: 1,
-  timeIntervalM: 0o0,
+  numInterval: "5",
+  timeIntervalH: "1",
+  timeIntervalM: "00",
 
   setNumberInterval: (value) => set({ numInterval: value }),
   setTimeIntervalH: (value) => set({ timeIntervalH: value }),

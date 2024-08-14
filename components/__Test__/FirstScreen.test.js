@@ -6,6 +6,7 @@ import SetTimer from "../SetTimer";
 import SetRest from "../SetRest";
 import IntervalHamburger from "../IntervalHamburger";
 import IntervalModal from "../../app/(modal)/intervalModal";
+import TimeStatus from "../TimeStatus";
 
 describe("PrimerScreen", () => {
   it("debería mostrar un componente con 3 TextInput, un input seguido de la letra h, un input seguido de la letra m y un input seguido de la letra s", () => {
@@ -105,23 +106,6 @@ describe("PrimerScreen", () => {
     expect(minuteInput2.props.value.length).toBeLessThanOrEqual(2);
   });
 
-  it("debería mostrar un componente con las horas efectivas", () => {
-    const { getByText } = render(<PrimerScreen />);
-    expect(getByText("Horas Efectivas")).toBeTruthy();
-  });
-
-  it("debería calcular el tiempo total correctamente", () => {
-    const { getByTestId } = render(<PrimerScreen />);
-    const hourInput = getByTestId("hour-input");
-    const minuteInput = getByTestId("minute-input");
-    const intervalInput = getByTestId("interval-input");
-    fireEvent.changeText(hourInput, "2");
-    fireEvent.changeText(minuteInput, "10");
-    fireEvent.changeText(intervalInput, "5");
-    const totalTime = getByTestId("total-time");
-    expect(totalTime.props.children).toBe("2:50");
-  });
-
   it("debería mostrar un btn hamburger", () => {
     const { getByTestId } = render(<IntervalHamburger />);
     const hamburgerBtn = getByTestId("hamburger-btn");
@@ -154,6 +138,25 @@ describe("PrimerScreen", () => {
     const { getByTestId } = render(<IntervalModal />);
     const intervalInput = getByTestId("interval-input");
     expect(intervalInput.props.value).toMatch("5");
+  });
+
+  it("debería mostrar un componente con las horas efectivas", () => {
+    const { getByTestId } = render(<TimeStatus />);
+    const timeStatusRender = getByTestId("time-status-component");
+
+    expect(timeStatusRender).toBeTruthy();
+  });
+
+  it("debería calcular el tiempo total correctamente", () => {
+    const { getByTestId } = render(<PrimerScreen />);
+    const hourInput = getByTestId("hour-input");
+    const minuteInput = getByTestId("minute-input");
+    const intervalInput = getByTestId("interval-input");
+    fireEvent.changeText(hourInput, "2");
+    fireEvent.changeText(minuteInput, "10");
+    fireEvent.changeText(intervalInput, "5");
+    const totalTime = getByTestId("total-time");
+    expect(totalTime.props.children).toBe("2:50");
   });
 
   it("debería navegar a la pantalla de countDown al presionar el botón iniciar", () => {
