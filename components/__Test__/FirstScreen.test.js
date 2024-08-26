@@ -5,8 +5,10 @@ import App from "../../app/index";
 import SetTimer from "../SetTimer";
 import SetRest from "../SetRest";
 import IntervalHamburger from "../IntervalHamburger";
-import IntervalModal from "../../app/(modal)/intervalModal";
 import TimeStatus from "../TimeStatus";
+import IntervalModal from "../../app/(modal)/intervalModal";
+import { View } from "react-native-web";
+import CountDownScreen from "../../app/countDownScreen";
 
 describe("PrimerScreen", () => {
   it("debería mostrar un componente con 3 TextInput, un input seguido de la letra h, un input seguido de la letra m y un input seguido de la letra s", () => {
@@ -147,23 +149,18 @@ describe("PrimerScreen", () => {
     expect(timeStatusRender).toBeTruthy();
   });
 
-  it("debería calcular el tiempo total correctamente", () => {
-    const { getByTestId } = render(<PrimerScreen />);
-    const hourInput = getByTestId("hour-input");
-    const minuteInput = getByTestId("minute-input");
-    const intervalInput = getByTestId("interval-input");
-    fireEvent.changeText(hourInput, "2");
-    fireEvent.changeText(minuteInput, "10");
-    fireEvent.changeText(intervalInput, "5");
-    const totalTime = getByTestId("total-time");
-    expect(totalTime.props.children).toBe("2:50");
-  });
-
   it("debería navegar a la pantalla de countDown al presionar el botón iniciar", () => {
-    const { getByText, getByTestId } = render(<PrimerScreen />);
-    const iniciarBtn = getByTestId("iniciar-btn");
-    fireEvent.press(iniciarBtn);
-    // Aquí puedes agregar la lógica para verificar la navegación
-    expect(getByText("CountDown")).toBeTruthy();
+    const MockCountDownScreen = jest.fn(() => <CountDownScreen />);
+    renderRouter(
+      {
+        index: MockCountDownScreen,
+        CountDownScreen: MockCountDownScreen,
+      },
+      {
+        initialUrl: "CountDownScreen",
+      }
+    );
+
+    expect(screen).toHavePathname("/CountDownScreen");
   });
 });

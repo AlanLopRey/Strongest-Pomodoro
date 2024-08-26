@@ -31,7 +31,7 @@ const TimerCard = styled.View`
 
 const App = () => {
   const goToCountDown = () => {
-    router.push("countDownScreen");
+    router.push("CountDownScreen");
   };
   return (
     <Wrapper>

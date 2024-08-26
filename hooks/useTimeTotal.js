@@ -16,7 +16,7 @@ const useTimeTotal = (hours, minutes, intervals, descanso) => {
 
       const totalHours = Math.floor(totalSeconds / 3600);
       const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
-      return `${totalHours} horas, ${totalMinutes} minutos`;
+      return `${totalHours} horas ${totalMinutes} minutos`;
     };
 
     const result = calculateTotalTime(hours, minutes, intervals, descanso);

@@ -34,9 +34,9 @@ const TimeStatus = () => {
     <StatusContainer testID="time-status-component">
       <TextStyle>Numero de intervalos: {numInterval}</TextStyle>
       <TextStyle>
-        Horas efectivas: {timerHours}:{timerMinutes}:00
+        Tiempo efectivo: {timerHours}:{timerMinutes}:00
       </TextStyle>
-      <TextStyle>Horas Totales: {totalTime}</TextStyle>
+      <TextStyle>Tiempo total: {totalTime}</TextStyle>
     </StatusContainer>
   );
 };

@@ -10,7 +10,7 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
-        name="countDownScreen"
+        name="CountDownScreen"
         options={{
           headerShown: false,
         }}
