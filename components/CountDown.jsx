@@ -2,6 +2,8 @@ import { View, Text } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { useIntervalStore } from "../store/intervalModalStore";
 import { useTimerStore } from "../store/timersStore";
+import { Audio, InterruptionModeAndroid } from "expo-av";
+import { Sound } from "expo-av/build/Audio/Sound";
 
 const AdComponent = () => {
   return (
@@ -40,8 +42,51 @@ const CountDown = () => {
     objWithData[currentIndex].totalTime || objWithData[currentIndex].rest
   );
   const [showAd, setShowAd] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sound, setSound] = useState(null);
 
-  const isWorkTime = objWithData[currentIndex].totalTime !== undefined;
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      staysActiveInBackground: true,
+      playsInSilentModeIOS: true,
+      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+      shouldDuckAndroid: true,
+      playThroughEarpieceAndroid: true,
+    });
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  const playAudio = async (soundFile) => {
+    // Set and play the sound
+    const { sound: newSound } = await Audio.Sound.createAsync({
+      uri: soundFile,
+    });
+    setSound(newSound);
+
+    setIsPlaying(true);
+    await newSound.playAsync();
+
+    newSound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        if (status.positionMillis < 5000) {
+          newSound.replayAsync(); // Repite el sonido
+        } else {
+          setIsPlaying(false);
+          newSound.unloadAsync(); // Detener y liberar el sonido después de 5 segundos
+        }
+      }
+    });
+
+    setTimeout(async () => {
+      await newSound.stopAsync(); // Detiene el sonido
+      await newSound.unloadAsync(); // Libera el sonido de la memoria
+      setIsPlaying(false);
+    }, 5000);
+  };
 
   useEffect(() => {
     const tick = () => {
@@ -49,10 +94,11 @@ const CountDown = () => {
         if (prev <= 0) {
           clearInterval(intervalRef.current);
           if (currentIndex < objWithData.length - 1) {
-            // Mostrar publicidad antes de avanzar
             if (objWithData[currentIndex].totalTime) {
+              playAudio("assets/sounds/work_end.wav"); // Llama a la función cuando termina `totalTime`
               setShowAd(true);
             } else {
+              playAudio("assets/sounds/rest_end.wav"); // Llama a la función cuando termina `rest`
               setCurrentIndex((prevIndex) => prevIndex + 1);
             }
           }
@@ -62,7 +108,7 @@ const CountDown = () => {
       });
     };
 
-    intervalRef.current = setInterval(tick, 10);
+    intervalRef.current = setInterval(tick, 1);
 
     return () => {
       clearInterval(intervalRef.current);
@@ -80,7 +126,7 @@ const CountDown = () => {
       const adTimer = setTimeout(() => {
         setShowAd(false);
         setCurrentIndex((prevIndex) => prevIndex + 1);
-      }, 2000); // Mostrar el anuncio durante 5 segundos
+      }, 5000);
 
       return () => clearTimeout(adTimer);
     }
@@ -101,14 +147,7 @@ const CountDown = () => {
       {showAd ? (
         <AdComponent />
       ) : (
-        <View>
-          <Text>
-            {isWorkTime
-              ? "Tiempo de trabajo restante"
-              : "Tiempo de descanzo restante"}
-          </Text>
-          <Text> {formatTime(timeDown)} </Text>
-        </View>
+        <Text>CountDown {formatTime(timeDown)} </Text>
       )}
     </View>
   );

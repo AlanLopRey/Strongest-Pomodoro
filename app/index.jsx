@@ -1,4 +1,11 @@
-import { View, Text, StyleSheet, SafeAreaView, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  Pressable,
+} from "react-native";
 import React from "react";
 import SetTimer from "../components/SetTimer";
 import SetRest from "../components/SetRest";
@@ -33,6 +40,7 @@ const App = () => {
   const goToCountDown = () => {
     router.push("CountDownScreen");
   };
+
   return (
     <Wrapper>
       <TimerCard>
