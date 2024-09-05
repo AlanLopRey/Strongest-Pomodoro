@@ -11,7 +11,7 @@ const SetTimer = () => {
 
   const handleHourChange = (text) => {
     if (text.leng <= 2) {
-      const givenMinutes = text <= 59 ? text : 59;
+      const givenMinutes = text <= "5" ? text : 59;
       setTimerMinutes(givenMinutes.replace(/[^0-9]/g, ""));
     } else {
       setTimerHours(text.slice(0, 2));
@@ -36,6 +36,14 @@ const SetTimer = () => {
     }
     return time;
   };
+  const handleBlurHour = (time) => {
+    if (time !== "" && time !== "00") {
+      time = time <= 12 ? time : `12`;
+    } else {
+      time = "00";
+    }
+    return time;
+  };
 
   return (
     <View style={styles.wrapper}>
@@ -44,7 +52,13 @@ const SetTimer = () => {
         keyboardType="numeric"
         style={styles.input}
         value={timerHours}
-        onChangeText={handleHourChange}
+        onChangeText={(text) => {
+          const givenMinutes = text <= 12 ? text : "12";
+          setTimerHours(givenMinutes.replace(/[^0-9]/g, ""));
+        }}
+        onBlur={() => {
+          setTimerHours(handleBlurHour(timerHours));
+        }}
         testID="hour-input-1"
       />
       <Text testID="hour-label-1">h</Text>

@@ -1,57 +1,70 @@
+import React from "react";
 import { View, Text, TextInput } from "react-native";
 import { useIntervalStore } from "../../store/intervalModalStore";
-// import React, { useState } from "react";
 
-const intervalModal = () => {
+const IntervalModal = () => {
   const {
-    numInterval,
-    timeIntervalH,
-    timeIntervalM,
+    numInterval = "5", // Valor por defecto
+    timeIntervalH = "1", // Valor por defecto
+    timeIntervalM = "0", // Valor por defecto
     setNumberInterval,
     setTimeIntervalH,
     setTimeIntervalM,
   } = useIntervalStore();
 
-  // const [numInterval, setNumberInterval] = useState("5");
-  // const [timeInterval, setTimeInterval] = useState("5");
-
   const handleIntervalChange = (text) => {
-    setNumberInterval(text);
+    const validInput = text.replace(/[^0-9]/g, ""); // Permitir solo números
+    const intervalValue = validInput <= 24 ? validInput : "24"; // Limitar el valor a 24
+    setNumberInterval(intervalValue); // Actualizar el estado
   };
+
   const handleTimeChangeH = (text) => {
-    setTimeIntervalH(text);
+    const validInput = text.replace(/[^0-9]/g, ""); // Permitir solo números
+    setTimeIntervalH(validInput);
   };
+
   const handleTimeChangeM = (text) => {
-    setTimeIntervalM(text);
+    const validInput = text.replace(/[^0-9]/g, ""); // Permitir solo números
+    setTimeIntervalM(validInput);
+  };
+
+  const handleBlur = (text, setFunction) => {
+    if (text === "" || text === "0") {
+      setFunction("5");
+    }
   };
 
   return (
     <View testID="interval-modal">
-      <Text>En cuantos intervalos te gustaria dividir tu dia</Text>
+      <Text>En cuántos intervalos te gustaría dividir tu día</Text>
       <TextInput
         testID="interval-input"
         keyboardType="numeric"
         maxLength={2}
-        value={numInterval}
+        value={numInterval || ""} // Asegurarse de que no sea undefined
         onChangeText={handleIntervalChange}
+        onBlur={() => handleBlur(numInterval, setNumberInterval)} // Aplicar handleBlur
       />
-      <Text>O en cuantos minutos/horas te gustaria trabajar por intervalo</Text>
+      <Text>¿En cuántas horas te gustaría trabajar por intervalo?</Text>
       <TextInput
-        testID="time-interval-id"
+        testID="time-interval-id-hours"
         keyboardType="numeric"
         maxLength={2}
-        value={timeIntervalH}
+        value={timeIntervalH || ""} // Asegurarse de que no sea undefined
         onChangeText={handleTimeChangeH}
+        onBlur={() => handleBlur(timeIntervalH, setTimeIntervalH)} // Aplicar handleBlur
       />
+      <Text>¿En cuántos minutos te gustaría trabajar por intervalo?</Text>
       <TextInput
-        testID="time-interval-id2"
+        testID="time-interval-id-minutes"
         keyboardType="numeric"
         maxLength={2}
-        value={timeIntervalM}
+        value={timeIntervalM || ""} // Asegurarse de que no sea undefined
         onChangeText={handleTimeChangeM}
+        onBlur={() => handleBlur(timeIntervalM, setTimeIntervalM)} // Aplicar handleBlur
       />
     </View>
   );
 };
 
-export default intervalModal;
+export default IntervalModal;

@@ -1,7 +1,6 @@
 import { View, Text } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
-import { useIntervalStore } from "../store/intervalModalStore";
-import { useTimerStore } from "../store/timersStore";
+import useData from "../hooks/useData";
 
 const AdComponent = () => {
   return (
@@ -12,79 +11,52 @@ const AdComponent = () => {
 };
 
 const CountDown = () => {
-  const { numInterval: intervalos } = useIntervalStore();
-  const {
-    timerHours: hours,
-    timerMinutes: minutes,
-    restMinutes: restTime,
-  } = useTimerStore();
-  const intervalRef = useRef(null);
-
-  const hoursToSec = hours * 3600;
-  const minuteToSec = minutes * 60;
-  const totalTimeSeconds = hoursToSec + minuteToSec;
-
-  const objWithData = [
-    { totalTime: totalTimeSeconds },
-    { rest: restTime * 60 },
-    { totalTime: totalTimeSeconds },
-    { rest: restTime * 60 },
-    { totalTime: totalTimeSeconds },
-    { rest: restTime * 60 },
-    { totalTime: totalTimeSeconds },
-    { rest: restTime * 60 },
-  ];
-
+  const [timeDown, setTimeDown] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [timeDown, setTimeDown] = useState(
-    objWithData[currentIndex].totalTime || objWithData[currentIndex].rest
-  );
+  const intervalRef = useRef(null);
+  const { data } = useData();
   const [showAd, setShowAd] = useState(false);
 
-  const isWorkTime = objWithData[currentIndex].totalTime !== undefined;
-
   useEffect(() => {
-    const tick = () => {
-      setTimeDown((prev) => {
-        if (prev <= 0) {
-          clearInterval(intervalRef.current);
-          if (currentIndex < objWithData.length - 1) {
-            // Mostrar publicidad antes de avanzar
-            if (objWithData[currentIndex].totalTime) {
-              setShowAd(true);
-            } else {
-              setCurrentIndex((prevIndex) => prevIndex + 1);
+    if (data.length > 0 && currentIndex < data.length) {
+      setTimeDown(
+        data[currentIndex]?.totalTime || data[currentIndex]?.rest || 0
+      );
+
+      const tick = () => {
+        setTimeDown((prev) => {
+          if (prev <= 0) {
+            if (currentIndex < data.length - 1) {
+              if (data[currentIndex]?.totalTime) {
+                setShowAd(true);
+              }
+              return 0; // Resetea el tiempo mientras se muestra el anuncio
             }
+            clearInterval(intervalRef.current);
+            return 0;
           }
-          return 0;
-        }
-        return prev - 1;
-      });
-    };
+          return prev - 1;
+        });
+      };
 
-    intervalRef.current = setInterval(tick, 10);
+      intervalRef.current = setInterval(tick, 10);
 
-    return () => {
-      clearInterval(intervalRef.current);
-    };
-  }, [currentIndex]);
-
-  useEffect(() => {
-    setTimeDown(
-      objWithData[currentIndex].totalTime || objWithData[currentIndex].rest
-    );
-  }, [currentIndex]);
+      return () => clearInterval(intervalRef.current);
+    }
+  }, [currentIndex, data]);
 
   useEffect(() => {
     if (showAd) {
       const adTimer = setTimeout(() => {
         setShowAd(false);
-        setCurrentIndex((prevIndex) => prevIndex + 1);
-      }, 2000); // Mostrar el anuncio durante 5 segundos
+        if (currentIndex < data.length - 1) {
+          setCurrentIndex((prevIndex) => prevIndex + 1);
+        }
+      }, 5000); // Mostrar el anuncio durante 5 segundos
 
       return () => clearTimeout(adTimer);
     }
-  }, [showAd]);
+  }, [showAd, currentIndex, data.length]);
 
   const formatTime = (segundos) => {
     const horas = Math.floor(segundos / 3600);
@@ -103,11 +75,11 @@ const CountDown = () => {
       ) : (
         <View>
           <Text>
-            {isWorkTime
+            {data[currentIndex]?.totalTime !== undefined
               ? "Tiempo de trabajo restante"
-              : "Tiempo de descanzo restante"}
+              : "Tiempo de descanso restante"}
           </Text>
-          <Text> {formatTime(timeDown)} </Text>
+          <Text>{formatTime(timeDown)}</Text>
         </View>
       )}
     </View>

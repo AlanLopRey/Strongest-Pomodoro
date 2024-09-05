@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import React from "react";
 import styled from "styled-components/native";
 import CountDown from "../components/CountDown";
-import CountDownChatGpt from "../components/CountDownChatGpt";
+// import CountDownChatGpt from "../components/CountDownChatGpt";
 
 const Main = styled.View`
   display: flex;
