@@ -8,24 +8,23 @@ const IntervalModal = () => {
   const [isInvalid, setIsInvalid] = useState(false);
 
   const handleIntervalChange = (text) => {
-    // Eliminar cualquier caracter que no sea número
     const validInput = text.replace(/[^0-9]/g, "");
+    let intervalValue = parseInt(validInput, 10) || ""; // Permitir un string vacío si el input no es un número válido
+    if (intervalValue < 1 && intervalValue !== "") intervalValue = 1;
+    if (intervalValue > 24) intervalValue = 24;
+    setInputValue(intervalValue.toString()); // Actualizar el estado local
+  };
 
-    // Si el input está vacío, actualizamos el estado local para reflejarlo
-    if (validInput === "") {
-      setInputValue("");
-      return;
-    }
+  const handleFocus = () => {
+    setInputValue(""); // Borrar el valor del input al tomar focus
+  };
 
-    // Convertir el texto a número para validación
-    const number = parseInt(validInput, 10);
-
-    // Validar que el número esté entre 1 y 24
-    if (number >= 1 && number <= 24) {
-      setInputValue(validInput); // Actualizar el valor del input
-      setNumberInterval(validInput); // Actualizar el estado global
+  const handleBlur = () => {
+    if (inputValue === "" || inputValue === "0") {
+      setInputValue("5"); // Restablecer a 5 si el input está vacío o es 0
+      setNumberInterval("5");
     } else {
-      setIsInvalid(true);
+      setNumberInterval(inputValue); // Actualizar el estado global cuando el input pierde focus
     }
   };
 
@@ -36,9 +35,10 @@ const IntervalModal = () => {
         testID="interval-input"
         keyboardType="numeric"
         maxLength={2}
-        value={inputValue}
+        value={inputValue} // Usar el estado local
         onChangeText={handleIntervalChange}
-        placeholder="Ingrese un número entre 1 y 24"
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       />
     </View>
   );
