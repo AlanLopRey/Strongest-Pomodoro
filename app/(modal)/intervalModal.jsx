@@ -1,67 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput } from "react-native";
 import { useIntervalStore } from "../../store/intervalModalStore";
 
 const IntervalModal = () => {
-  const {
-    numInterval = "5", // Valor por defecto
-    timeIntervalH = "1", // Valor por defecto
-    timeIntervalM = "0", // Valor por defecto
-    setNumberInterval,
-    setTimeIntervalH,
-    setTimeIntervalM,
-  } = useIntervalStore();
+  const { numInterval = "5", setNumberInterval } = useIntervalStore();
+  const [inputValue, setInputValue] = useState(numInterval);
+  const [isInvalid, setIsInvalid] = useState(false);
 
   const handleIntervalChange = (text) => {
-    const validInput = text.replace(/[^0-9]/g, ""); // Permitir solo números
-    const intervalValue = validInput <= 24 ? validInput : "24"; // Limitar el valor a 24
-    setNumberInterval(intervalValue); // Actualizar el estado
-  };
+    // Eliminar cualquier caracter que no sea número
+    const validInput = text.replace(/[^0-9]/g, "");
 
-  const handleTimeChangeH = (text) => {
-    const validInput = text.replace(/[^0-9]/g, ""); // Permitir solo números
-    setTimeIntervalH(validInput);
-  };
+    // Si el input está vacío, actualizamos el estado local para reflejarlo
+    if (validInput === "") {
+      setInputValue("");
+      return;
+    }
 
-  const handleTimeChangeM = (text) => {
-    const validInput = text.replace(/[^0-9]/g, ""); // Permitir solo números
-    setTimeIntervalM(validInput);
-  };
+    // Convertir el texto a número para validación
+    const number = parseInt(validInput, 10);
 
-  const handleBlur = (text, setFunction) => {
-    if (text === "" || text === "0") {
-      setFunction("5");
+    // Validar que el número esté entre 1 y 24
+    if (number >= 1 && number <= 24) {
+      setInputValue(validInput); // Actualizar el valor del input
+      setNumberInterval(validInput); // Actualizar el estado global
+    } else {
+      setIsInvalid(true);
     }
   };
 
   return (
     <View testID="interval-modal">
-      <Text>En cuántos intervalos te gustaría dividir tu día</Text>
+      <Text>¿En cuántos intervalos te gustaría dividir tu día?</Text>
       <TextInput
         testID="interval-input"
         keyboardType="numeric"
         maxLength={2}
-        value={numInterval || ""} // Asegurarse de que no sea undefined
+        value={inputValue}
         onChangeText={handleIntervalChange}
-        onBlur={() => handleBlur(numInterval, setNumberInterval)} // Aplicar handleBlur
-      />
-      <Text>¿En cuántas horas te gustaría trabajar por intervalo?</Text>
-      <TextInput
-        testID="time-interval-id-hours"
-        keyboardType="numeric"
-        maxLength={2}
-        value={timeIntervalH || ""} // Asegurarse de que no sea undefined
-        onChangeText={handleTimeChangeH}
-        onBlur={() => handleBlur(timeIntervalH, setTimeIntervalH)} // Aplicar handleBlur
-      />
-      <Text>¿En cuántos minutos te gustaría trabajar por intervalo?</Text>
-      <TextInput
-        testID="time-interval-id-minutes"
-        keyboardType="numeric"
-        maxLength={2}
-        value={timeIntervalM || ""} // Asegurarse de que no sea undefined
-        onChangeText={handleTimeChangeM}
-        onBlur={() => handleBlur(timeIntervalM, setTimeIntervalM)} // Aplicar handleBlur
+        placeholder="Ingrese un número entre 1 y 24"
       />
     </View>
   );
