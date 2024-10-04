@@ -1,88 +1,99 @@
-import { View, Text, TextInput, keyboardType, StyleSheet } from "react-native";
+import { View, Text, TextInput, StyleSheet } from "react-native";
 import React, { useState } from "react";
 import { useTimerStore } from "../store/timersStore";
 
 const SetTimer = () => {
   const { timerHours, timerMinutes, setTimerHours, setTimerMinutes } =
     useTimerStore();
-  // const [timerHours, setTimerHours] = useState("00");
-  // const [timerMinutes, setTimerMinutes] = useState("00");
-  const [seconds, setSeconds] = useState("00");
+  const [seconds] = useState("00");
 
-  const handleHourChange = (text) => {
-    if (text.leng <= 2) {
-      const givenMinutes = text <= "5" ? text : 59;
-      setTimerMinutes(givenMinutes.replace(/[^0-9]/g, ""));
-    } else {
-      setTimerHours(text.slice(0, 2));
+  // Función para validar los minutos cuando cambian las horas
+  const validateMinutesWithHour = () => {
+    const hours = parseInt(timerHours, 10);
+    const minutes = parseInt(timerMinutes, 10);
+
+    // Si las horas son 0 y los minutos son menores a 25, ajustamos los minutos
+    if ((hours < 1 && minutes < 25) || timerMinutes === "") {
+      setTimerMinutes("25");
     }
   };
 
-  const handleMinuteChange = (text) => {
-    if (text.leng <= 2) {
-      setTimerMinutes(text);
+  // Validación de las horas al salir del campo (blur)
+  const handleBlurHour = () => {
+    const validHour = timerHours.replace(/[^0-9]/g, ""); // Limitar a números
+    let hourValue = parseInt(validHour, 10);
+
+    if (isNaN(hourValue) || hourValue < 0) {
+      setTimerHours("00");
+    } else if (hourValue > 12) {
+      setTimerHours("12");
     } else {
-      setTimerMinutes(text.slice(0, 2));
+      setTimerHours(validHour.length === 1 ? `0${validHour}` : validHour);
     }
+
+    // Después de cambiar la hora, validamos los minutos
+
+    validateMinutesWithHour();
   };
 
-  const handleBlur = (time) => {
-    if (time !== "" && time !== "00") {
-      if (time.length < 2) {
-        time = time > 9 ? time : `0${time}`;
-      }
+  // Validación de los minutos al salir del campo (blur)
+  const handleBlurMinute = () => {
+    const validMinute = timerMinutes.replace(/[^0-9]/g, "");
+    let minuteValue = parseInt(validMinute, 10);
+
+    if (isNaN(minuteValue) || minuteValue < 0) {
+      setTimerMinutes("00");
+    } else if (minuteValue > 59) {
+      setTimerMinutes("59");
     } else {
-      time = "00";
+      setTimerMinutes(
+        validMinute.length === 1 ? `0${validMinute}` : validMinute
+      );
     }
-    return time;
-  };
-  const handleBlurHour = (time) => {
-    if (time !== "" && time !== "00") {
-      time = time <= 12 ? time : `12`;
-    } else {
-      time = "00";
-    }
-    return time;
+
+    // Después de cambiar los minutos, validamos según las horas
+    validateMinutesWithHour();
   };
 
   return (
     <View style={styles.wrapper}>
+      {/* Input de horas */}
       <TextInput
         maxLength={2}
         keyboardType="numeric"
         style={styles.input}
         value={timerHours}
         onChangeText={(text) => {
-          const givenMinutes = text <= 12 ? text : "12";
-          setTimerHours(givenMinutes.replace(/[^0-9]/g, ""));
+          const validHour = text.replace(/[^0-9]/g, "");
+          setTimerHours(validHour);
         }}
-        onBlur={() => {
-          setTimerHours(handleBlurHour(timerHours));
-        }}
+        onBlur={handleBlurHour}
         testID="hour-input-1"
       />
       <Text testID="hour-label-1">h</Text>
+
+      {/* Input de minutos */}
       <TextInput
         maxLength={2}
         keyboardType="numeric"
         style={styles.input}
         value={timerMinutes}
         onChangeText={(text) => {
-          const givenMinutes = text <= 59 ? text : "59";
-          setTimerMinutes(givenMinutes.replace(/[^0-9]/g, ""));
+          const validMinutes = text.replace(/[^0-9]/g, "");
+          setTimerMinutes(validMinutes);
         }}
-        onBlur={() => {
-          setTimerMinutes(handleBlur(timerMinutes));
-        }}
+        onBlur={handleBlurMinute}
         testID="minute-input-1"
       />
       <Text testID="minute-label-1">m</Text>
+
+      {/* Input de segundos (no editable) */}
       <TextInput
         maxLength={2}
         keyboardType="numeric"
         style={styles.input}
         value={seconds}
-        editable={false}
+        editable={false} // El campo no es editable
         testID="second-input-1"
       />
       <Text testID="second-label-1">s</Text>

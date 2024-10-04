@@ -3,16 +3,16 @@ import { View, Text, TextInput } from "react-native";
 import { useIntervalStore } from "../../store/intervalModalStore";
 
 const IntervalModal = () => {
-  const { numInterval = "5", setNumberInterval } = useIntervalStore();
+  const { numInterval, setNumberInterval } = useIntervalStore();
   const [inputValue, setInputValue] = useState(numInterval);
   const [isInvalid, setIsInvalid] = useState(false);
 
   const handleIntervalChange = (text) => {
     const validInput = text.replace(/[^0-9]/g, "");
     let intervalValue = parseInt(validInput, 10) || ""; // Permitir un string vacío si el input no es un número válido
-    if (intervalValue < 1 && intervalValue !== "") intervalValue = 1;
+    if (intervalValue === 0) intervalValue = 1;
     if (intervalValue > 24) intervalValue = 24;
-    setInputValue(intervalValue.toString()); // Actualizar el estado local
+    setInputValue(intervalValue); // Actualizar el estado local
   };
 
   const handleFocus = () => {
@@ -35,7 +35,7 @@ const IntervalModal = () => {
         testID="interval-input"
         keyboardType="numeric"
         maxLength={2}
-        value={inputValue} // Usar el estado local
+        value={inputValue} // Usando el estado global (just to see)
         onChangeText={handleIntervalChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
