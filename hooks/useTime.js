@@ -13,8 +13,8 @@ const useTime = (hours, minutes, intervals, rest = 20) => {
 
     const calculateWorkTime = (hours, minutes, intervals) => {
       const totalTimeSeconds = hours * 3600 + minutes * 60;
-
-      const timeSesion = totalTimeSeconds / intervals;
+      // prttier/ignore
+      const timeSesion = Math.floor(totalTimeSeconds / intervals);
       return timeSesion;
     };
 

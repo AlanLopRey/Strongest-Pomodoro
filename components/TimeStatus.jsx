@@ -9,7 +9,7 @@ import { useEffect } from "react";
 
 const StatusContainer = styled.View`
   border: 1px solid black;
-  height: 15%;
+  height: 25%;
   display: flex;
   justify-content: center;
   margin: 0px 10px 0px 10px;
@@ -50,6 +50,10 @@ const TimeStatus = () => {
   return (
     <StatusContainer testID="time-status-component">
       <TextStyle>Numero de intervalos: {numInterval}</TextStyle>
+      {/* Borra bloque */}
+      <TextStyle>el numero de abajo no debe ser menor a 1500</TextStyle>
+      <TextStyle>Tiempo de trabajo: {workSeconds}</TextStyle>
+      {/*  */}
       <TextStyle>
         Tiempo efectivo: {timerHours}:{timerMinutes}:00
       </TextStyle>
