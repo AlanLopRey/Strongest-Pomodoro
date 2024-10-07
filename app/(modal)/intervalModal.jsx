@@ -12,11 +12,7 @@ const IntervalModal = () => {
     let intervalValue = parseInt(validInput, 10) || ""; // Permitir un string vacío si el input no es un número válido
     if (intervalValue === 0) intervalValue = 1;
     if (intervalValue > 24) intervalValue = 24;
-    setInputValue(intervalValue); // Actualizar el estado local
-  };
-
-  const handleFocus = () => {
-    setInputValue(""); // Borrar el valor del input al tomar focus
+    setNumberInterval(intervalValue);
   };
 
   const handleBlur = () => {
@@ -35,9 +31,10 @@ const IntervalModal = () => {
         testID="interval-input"
         keyboardType="numeric"
         maxLength={2}
-        value={inputValue} // Usando el estado global (just to see)
-        onChangeText={handleIntervalChange}
-        onFocus={handleFocus}
+        placeholder="Agrega el numero de Intervalos"
+        blurOnSubmit={true}
+        value={inputValue}
+        onChangeText={(val) => handleIntervalChange(val)}
         onBlur={handleBlur}
       />
     </View>
