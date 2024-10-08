@@ -1,6 +1,9 @@
 import { View, Text } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import useData from "../hooks/useData";
+import useTime from "../hooks/useTime";
+import { useIntervalStore } from "../store/intervalModalStore";
+import { useTimerStore } from "../store/timersStore";
 
 const AdComponent = () => {
   return (
@@ -14,8 +17,25 @@ const CountDown = () => {
   const [timeDown, setTimeDown] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const intervalRef = useRef(null);
-  const { data } = useData();
+  const {
+    numIntervals: intervals,
+    setIntervals,
+    decrementInterval,
+  } = useIntervalStore(); // Estado global de intervalos
+  const {
+    timerHours: hours,
+    timerMinutes: minutes,
+    restMinutes: restTime,
+  } = useTimerStore();
+  const { workTime } = useTime(hours, minutes, intervals); // Hook que calcula el tiempo total
+  const { data } = useData(); // Hook que depende de los intervalos
   const [showAd, setShowAd] = useState(false);
+
+  useEffect(() => {
+    console.log(workTime);
+    console.log("este console log esta en el decremento");
+    decrementInterval(hours, minutes);
+  }, [workTime, setIntervals]);
 
   useEffect(() => {
     if (data.length > 0 && currentIndex < data.length) {
@@ -39,7 +59,7 @@ const CountDown = () => {
         });
       };
 
-      intervalRef.current = setInterval(tick, 10);
+      intervalRef.current = setInterval(tick, 1000);
 
       return () => clearInterval(intervalRef.current);
     }

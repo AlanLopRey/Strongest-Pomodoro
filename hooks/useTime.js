@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 // import { useIntervalStore } from "../store/intervalModalStore";
 // import { useTimerStore } from "../store/timersStore";
+
+export const calculateWorkTime = (hours, minutes, intervals) => {
+  const totalTimeSeconds = hours * 3600 + minutes * 60;
+  // prttier/ignore
+  const timeSesion = Math.floor(totalTimeSeconds / intervals);
+  return timeSesion;
+};
+
 const useTime = (hours, minutes, intervals, rest = 20) => {
   const [totalTime, setTotalTime] = useState(0);
   const [workTime, setWorkTime] = useState(0);
@@ -9,13 +17,6 @@ const useTime = (hours, minutes, intervals, rest = 20) => {
     // prettier-ignore
     const timeToSeconds = (hours, minutes) => {
       return hours * 3600 + minutes * 60;
-    };
-
-    const calculateWorkTime = (hours, minutes, intervals) => {
-      const totalTimeSeconds = hours * 3600 + minutes * 60;
-      // prttier/ignore
-      const timeSesion = Math.floor(totalTimeSeconds / intervals);
-      return timeSesion;
     };
 
     const calculateTotalTime = (hours, minutes, intervals, rest) => {

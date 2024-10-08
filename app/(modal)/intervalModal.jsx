@@ -12,7 +12,7 @@ const IntervalModal = () => {
     let intervalValue = parseInt(validInput, 10) || ""; // Permitir un string vacío si el input no es un número válido
     if (intervalValue === 0) intervalValue = 1;
     if (intervalValue > 24) intervalValue = 24;
-    setNumberInterval(intervalValue);
+    setInputValue(intervalValue); // Actualizar el estado local
   };
 
   const handleBlur = () => {
