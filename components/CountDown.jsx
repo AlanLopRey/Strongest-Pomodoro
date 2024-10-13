@@ -32,8 +32,6 @@ const CountDown = () => {
   const [showAd, setShowAd] = useState(false);
 
   useEffect(() => {
-    console.log(workTime);
-    console.log("este console log esta en el decremento");
     decrementInterval(hours, minutes);
   }, [workTime, setIntervals]);
 

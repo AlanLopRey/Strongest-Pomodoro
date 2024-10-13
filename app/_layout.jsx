@@ -16,6 +16,12 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
+        name="LoaderScreen"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="(modal)/intervalModal"
         options={{
           presentation: "modal",

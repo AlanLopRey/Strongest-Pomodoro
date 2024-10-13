@@ -19,9 +19,6 @@ export const useIntervalStore = create((set, get) => ({
 
     // Mientras workTime sea menor a 1500 segundos y los intervalos sean mayores a 1
     while (workTime < 1500 && currentInterval > 1) {
-      console.log(
-        `workTime actual: ${workTime}, numInterval actual: ${currentInterval}`
-      );
       currentInterval -= 1; // Reducir un intervalo
       set({ numInterval: currentInterval }); // Actualizar el estado
 
@@ -32,15 +29,15 @@ export const useIntervalStore = create((set, get) => ({
       await new Promise((resolve) => requestAnimationFrame(resolve));
     }
 
-    if (currentInterval === 1 && workTime < 1500) {
-      console.warn(
-        "No se pueden reducir más los intervalos, workTime sigue siendo bajo."
-      );
-    } else {
-      console.log(
-        `Se alcanzó un workTime válido: ${workTime} con numInterval: ${currentInterval}`
-      );
-      return;
-    }
+    // if (currentInterval === 1 && workTime < 1500) {
+    //   console.warn(
+    //     "No se pueden reducir más los intervalos, workTime sigue siendo bajo."
+    //   );
+    // } else {
+    //   console.log(
+    //     `Se alcanzó un workTime válido: ${workTime} con numInterval: ${currentInterval}`
+    //   );
+    //   return;
+    // }
   },
 }));
