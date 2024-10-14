@@ -4,6 +4,7 @@ import useData from "../hooks/useData";
 import useTime from "../hooks/useTime";
 import { useIntervalStore } from "../store/intervalModalStore";
 import { useTimerStore } from "../store/timersStore";
+import Button from "./Button";
 
 const AdComponent = () => {
   return (
@@ -30,6 +31,8 @@ const CountDown = () => {
   const { workTime } = useTime(hours, minutes, intervals); // Hook que calcula el tiempo total
   const { data } = useData(); // Hook que depende de los intervalos
   const [showAd, setShowAd] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // Estado de pausa
+  const [isStopped, setIsStopped] = useState(false); // Estado de detenido
 
   useEffect(() => {
     decrementInterval(hours, minutes);
@@ -57,11 +60,13 @@ const CountDown = () => {
         });
       };
 
-      intervalRef.current = setInterval(tick, 1000);
+      if (!isPaused) {
+        intervalRef.current = setInterval(tick, 1000);
+      }
 
       return () => clearInterval(intervalRef.current);
     }
-  }, [currentIndex, data]);
+  }, [currentIndex, data, isPaused, isStopped]);
 
   useEffect(() => {
     if (showAd) {
@@ -75,6 +80,16 @@ const CountDown = () => {
       return () => clearTimeout(adTimer);
     }
   }, [showAd, currentIndex, data.length]);
+
+  const handlePause = () => {
+    setIsPaused((prev) => !prev); // Alterna entre pausar y reanudar
+  };
+
+  const handleStop = () => {
+    setIsStopped(true); // Detiene completamente el temporizador
+    clearInterval(intervalRef.current); // Limpia el intervalo
+    setTimeDown(0); // Resetea el temporizador a cero
+  };
 
   const formatTime = (segundos) => {
     const horas = Math.floor(segundos / 3600);
@@ -100,6 +115,10 @@ const CountDown = () => {
           <Text>{formatTime(timeDown)}</Text>
         </View>
       )}
+      <Button onPressFn={handlePause}>
+        {isPaused ? "Reanudar" : "Pausar"} {/* Muestra el estado */}
+      </Button>
+      <Button onPressFn={handleStop}>Detener</Button>
     </View>
   );
 };
