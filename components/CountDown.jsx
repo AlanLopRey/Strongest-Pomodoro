@@ -15,82 +15,76 @@ const AdComponent = () => {
 };
 
 const CountDown = () => {
-  const [timeDown, setTimeDown] = useState(0);
+  const [displayTime, setDisplayTime] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const intervalRef = useRef(null);
+  const timeDownRef = useRef(0); // Mantenemos el tiempo restante aquí
   const {
     numIntervals: intervals,
     setIntervals,
     decrementInterval,
-  } = useIntervalStore(); // Estado global de intervalos
+  } = useIntervalStore();
   const {
     timerHours: hours,
     timerMinutes: minutes,
     restMinutes: restTime,
   } = useTimerStore();
-  const { workTime } = useTime(hours, minutes, intervals); // Hook que calcula el tiempo total
-  const { data } = useData(); // Hook que depende de los intervalos
+  const { workTime } = useTime(hours, minutes, intervals); // Hook para calcular el tiempo
+  const { data } = useData();
   const [showAd, setShowAd] = useState(false);
-  const [isPaused, setIsPaused] = useState(false); // Estado de pausa
-  const [isStopped, setIsStopped] = useState(false); // Estado de detenido
+  const [isPaused, setIsPaused] = useState(false); // Estado para pausar/reanudar
+  const [isStopped, setIsStopped] = useState(false); // Estado para detener
 
   useEffect(() => {
     decrementInterval(hours, minutes);
   }, [workTime, setIntervals]);
 
+  // Actualiza el tiempo restante en función del intervalo actual
   useEffect(() => {
     if (data.length > 0 && currentIndex < data.length) {
-      setTimeDown(
-        data[currentIndex]?.totalTime || data[currentIndex]?.rest || 0
-      );
-
-      const tick = () => {
-        setTimeDown((prev) => {
-          if (prev <= 0) {
-            if (currentIndex < data.length - 1) {
-              if (data[currentIndex]?.totalTime) {
-                setShowAd(true);
-              }
-              return 0; // Resetea el tiempo mientras se muestra el anuncio
-            }
-            clearInterval(intervalRef.current);
-            return 0;
-          }
-          return prev - 1;
-        });
-      };
-
-      if (!isPaused) {
-        intervalRef.current = setInterval(tick, 1000);
-      }
-
-      return () => clearInterval(intervalRef.current);
+      timeDownRef.current =
+        data[currentIndex]?.totalTime || data[currentIndex]?.rest || 0;
+      setDisplayTime(timeDownRef.current); // Inicializa displayTime con el valor actual
     }
-  }, [currentIndex, data, isPaused, isStopped]);
+  }, [currentIndex, data]);
 
+  // Efecto que maneja el intervalo del temporizador
+  useEffect(() => {
+    const tick = () => {
+      if (!isPaused && timeDownRef.current > 0) {
+        timeDownRef.current -= 1;
+        setDisplayTime(timeDownRef.current); // Actualiza el display
+      } else if (timeDownRef.current <= 0) {
+        clearInterval(intervalRef.current); // Detiene el temporizador cuando llega a cero
+        if (currentIndex < data.length - 1) {
+          setShowAd(true); // Muestra el anuncio
+          setCurrentIndex((prevIndex) => prevIndex + 1); // Cambia al siguiente intervalo
+        }
+      }
+    };
+
+    if (!isPaused) {
+      intervalRef.current = setInterval(tick, 1); // Actualiza cada segundo
+    }
+
+    return () => clearInterval(intervalRef.current); // Limpia el intervalo al desmontar o actualizar
+  }, [isPaused, currentIndex, data]);
+
+  // Maneja el anuncio
   useEffect(() => {
     if (showAd) {
       const adTimer = setTimeout(() => {
-        setShowAd(false);
+        setShowAd(false); // Oculta el anuncio después de 5 segundos
         if (currentIndex < data.length - 1) {
           setCurrentIndex((prevIndex) => prevIndex + 1);
         }
-      }, 5000); // Mostrar el anuncio durante 5 segundos
+      }, 5000); // Dura 5 segundos
 
       return () => clearTimeout(adTimer);
     }
   }, [showAd, currentIndex, data.length]);
 
-  const handlePause = () => {
-    setIsPaused((prev) => !prev); // Alterna entre pausar y reanudar
-  };
-
-  const handleStop = () => {
-    setIsStopped(true); // Detiene completamente el temporizador
-    clearInterval(intervalRef.current); // Limpia el intervalo
-    setTimeDown(0); // Resetea el temporizador a cero
-  };
-
+  // Formatear el tiempo para mostrarlo en formato legible
   const formatTime = (segundos) => {
     const horas = Math.floor(segundos / 3600);
     const minutos = Math.floor((segundos % 3600) / 60);
@@ -101,6 +95,11 @@ const CountDown = () => {
     }s`;
   };
 
+  // Alterna entre pausar y reanudar el temporizador
+  const togglePause = () => {
+    setIsPaused((prev) => !prev);
+  };
+
   return (
     <View>
       {showAd ? (
@@ -108,17 +107,16 @@ const CountDown = () => {
       ) : (
         <View>
           <Text>
-            {data[currentIndex]?.totalTime !== undefined
+            {data[currentIndex]?.totalTime != null
               ? "Tiempo de trabajo restante"
               : "Tiempo de descanso restante"}
           </Text>
-          <Text>{formatTime(timeDown)}</Text>
+          <Text>{formatTime(displayTime)}</Text>
         </View>
       )}
-      <Button onPressFn={handlePause}>
-        {isPaused ? "Reanudar" : "Pausar"} {/* Muestra el estado */}
+      <Button onPressFn={togglePause}>
+        {isPaused ? "Reanudar" : "Pausar"}
       </Button>
-      <Button onPressFn={handleStop}>Detener</Button>
     </View>
   );
 };
