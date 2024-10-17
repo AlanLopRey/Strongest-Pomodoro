@@ -1,18 +1,12 @@
-import { View, Text } from "react-native";
+import { View, Text, Modal } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import useData from "../hooks/useData";
 import useTime from "../hooks/useTime";
 import { useIntervalStore } from "../store/intervalModalStore";
 import { useTimerStore } from "../store/timersStore";
 import Button from "./Button";
-
-const AdComponent = () => {
-  return (
-    <View>
-      <Text>Anuncio</Text>
-    </View>
-  );
-};
+import { router } from "expo-router/build";
+import AdComponent from "./AdComponent";
 
 const CountDown = () => {
   const [displayTime, setDisplayTime] = useState(0);
@@ -34,11 +28,20 @@ const CountDown = () => {
   const [showAd, setShowAd] = useState(false);
   const [isPaused, setIsPaused] = useState(false); // Estado para pausar/reanudar
   const [isStopped, setIsStopped] = useState(false); // Estado para detener
+  const [currentObject, setCurrentObject] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     decrementInterval(hours, minutes);
   }, [workTime, setIntervals]);
 
+  //efecto para actualizar el currentObject
+  useEffect(() => {
+    // Actualizamos currentObject cuando currentIndex cambia
+    if (data.length > 0 && currentIndex < data.length) {
+      setCurrentObject(data[currentIndex]);
+    }
+  }, [currentIndex, data]);
   // Actualiza el tiempo restante en función del intervalo actual
   useEffect(() => {
     if (data.length > 0 && currentIndex < data.length) {
@@ -56,15 +59,12 @@ const CountDown = () => {
         setDisplayTime(timeDownRef.current); // Actualiza el display
       } else if (timeDownRef.current <= 0) {
         clearInterval(intervalRef.current); // Detiene el temporizador cuando llega a cero
-        if (currentIndex < data.length - 1) {
-          setShowAd(true); // Muestra el anuncio
-          setCurrentIndex((prevIndex) => prevIndex + 1); // Cambia al siguiente intervalo
-        }
+        setShowAd(true); // Muestra el anuncio
       }
     };
 
     if (!isPaused) {
-      intervalRef.current = setInterval(tick, 1); // Actualiza cada segundo
+      intervalRef.current = setInterval(tick, 10); // Actualiza cada segundo
     }
 
     return () => clearInterval(intervalRef.current); // Limpia el intervalo al desmontar o actualizar
@@ -74,11 +74,11 @@ const CountDown = () => {
   useEffect(() => {
     if (showAd) {
       const adTimer = setTimeout(() => {
-        setShowAd(false); // Oculta el anuncio después de 5 segundos
+        setShowAd(false); // Oculta el anuncio después de 2 segundos
         if (currentIndex < data.length - 1) {
-          setCurrentIndex((prevIndex) => prevIndex + 1);
+          setCurrentIndex((prevIndex) => prevIndex + 1); // Cambia al siguiente intervalo solo una vez
         }
-      }, 5000); // Dura 5 segundos
+      }, 2000); // Duración del anuncio
 
       return () => clearTimeout(adTimer);
     }
@@ -100,6 +100,21 @@ const CountDown = () => {
     setIsPaused((prev) => !prev);
   };
 
+  const handleStop = () => {
+    setShowModal(true); // Muestra el modal de confirmación
+  };
+
+  // Lógica para detener y regresar a la pantalla principal
+  const confirmStop = () => {
+    setIsStopped(true); // Detiene el temporizador
+    clearInterval(intervalRef.current); // Limpia el intervalo
+    setShowModal(false); // Oculta el modal
+    router.replace("/");
+  };
+
+  const cancelStop = () => {
+    setShowModal(false); // Cancela el detener, oculta el modal
+  };
   return (
     <View>
       {showAd ? (
@@ -107,9 +122,12 @@ const CountDown = () => {
       ) : (
         <View>
           <Text>
-            {data[currentIndex]?.totalTime != null
-              ? "Tiempo de trabajo restante"
-              : "Tiempo de descanso restante"}
+            {currentObject &&
+              (currentObject.totalTime
+                ? "Tiempo de trabajo restante"
+                : currentObject.rest
+                ? "Tiempo de descanso restante"
+                : null)}
           </Text>
           <Text>{formatTime(displayTime)}</Text>
         </View>
@@ -117,8 +135,43 @@ const CountDown = () => {
       <Button onPressFn={togglePause}>
         {isPaused ? "Reanudar" : "Pausar"}
       </Button>
+
+      <Button onPressFn={handleStop}>Detener</Button>
+
+      {/* Modal de confirmación */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showModal}
+        onRequestClose={() => setShowModal(false)} // Manejo para cerrar modal
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text>¿Estás seguro de que quieres detener el temporizador?</Text>
+            <Button onPressFn={confirmStop}>Sí, detener</Button>
+            <Button onPressFn={cancelStop} title="Cancelar">
+              Cancelar
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
+};
+
+const styles = {
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo semi-transparente
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
 };
 
 export default CountDown;

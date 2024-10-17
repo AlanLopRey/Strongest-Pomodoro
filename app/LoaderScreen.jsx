@@ -13,7 +13,7 @@ const LoaderScreen = () => {
     const calculateWorkTime = async () => {
       await decrementInterval(hours, minutes);
       setLoading(false);
-      router.push("CountDownScreen"); // Navegar a CountDown cuando termine
+      router.replace("CountDownScreen"); // Navegar a CountDown cuando termine
     };
 
     calculateWorkTime(); // Iniciar el cálculo al montar el componente
