@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
 export const useTimerStore = create((set) => ({
-  timerHours: "00",
-  timerMinutes: "10",
+  timerHours: "4",
+  timerMinutes: "00",
   restMinutes: "10",
 
   setRestMinutes: (value) => set({ restMinutes: value }),
