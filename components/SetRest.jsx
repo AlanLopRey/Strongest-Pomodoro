@@ -6,16 +6,35 @@ const SetRest = () => {
   const { restMinutes, setRestMinutes } = useTimerStore();
   // const [restMinutes, setRestMinutes] = useState("00");
 
-  const handleBlur = (time) => {
-    if (time !== "" && time !== "00") {
-      if (time.length < 2) {
-        time = time > 9 ? time : `0${time}`;
-      }
+  const handleMinuteBlur = () => {
+    const validTimeMinutes = restMinutes.replace(/[^0-9]/g, "");
+    let minuteRest = parseInt(validTimeMinutes, 10);
+
+    if (isNaN(minuteRest) || minuteRest < 0) {
+      setRestMinutes("05");
+    } else if (minuteRest > 30) {
+      setRestMinutes("30");
+    } else if (minuteRest < 5) {
+      setRestMinutes("05");
     } else {
-      time = "00";
+      setRestMinutes(
+        validTimeMinutes.length === 1
+          ? `0${validTimeMinutes}`
+          : validTimeMinutes
+      );
     }
-    return time;
   };
+
+  // const handleBlur = (time) => {
+  //   if (time !== "" && time !== "00") {
+  //     if (time.length < 2) {
+  //       time = time > 9 ? time : `0${time}`;
+  //     }
+  //   } else {
+  //     time = "00";
+  //   }
+  //   return time;
+  // };
 
   return (
     <View style={styles.wrapper}>
@@ -35,12 +54,10 @@ const SetRest = () => {
         keyboardType="numeric"
         style={styles.input}
         onChangeText={(text) => {
-          const givenMinutes = text <= 30 ? text : "30";
-          setRestMinutes(givenMinutes.replace(/[^0-9]/g, ""));
+          const validTime = text.replace(/[^0-9]/g, "");
+          setRestMinutes(validTime);
         }}
-        onBlur={() => {
-          setRestMinutes(handleBlur(restMinutes));
-        }}
+        onBlur={handleMinuteBlur}
       />
       <Text testID="minute-label-2">m</Text>
       <TextInput

@@ -37,8 +37,8 @@ const TimerCard = styled.View`
 `;
 
 const App = () => {
-  const goToCountDown = () => {
-    router.push("CountDownScreen");
+  const goToLoader = () => {
+    router.push("LoaderScreen");
   };
 
   return (
@@ -51,7 +51,7 @@ const App = () => {
         <IntervalHamburger />
       </TimerCard>
       <TimeStatus />
-      <Button onPressFn={goToCountDown}>Iniciar</Button>
+      <Button onPressFn={goToLoader}>Iniciar</Button>
     </Wrapper>
   );
 };
