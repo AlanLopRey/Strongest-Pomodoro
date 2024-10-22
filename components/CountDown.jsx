@@ -29,20 +29,25 @@ const CountDown = () => {
   const [isPaused, setIsPaused] = useState(false); // Estado para pausar/reanudar
   const [isStopped, setIsStopped] = useState(false); // Estado para detener
   const [currentObject, setCurrentObject] = useState(null);
+  const [showModalStop, setShowModalStop] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  // Nuevos estados para modales de fin de trabajo y descanso
+  const [showWorkCompleteModal, setShowWorkCompleteModal] = useState(false);
+  const [showRestCompleteModal, setShowRestCompleteModal] = useState(false);
+  const [modalContentType, setModalContentType] = useState(null);
+  const timeoutRef = useRef(null); // Agrega esta línea para definir timeoutRef
 
   useEffect(() => {
     decrementInterval(hours, minutes);
   }, [workTime, setIntervals]);
 
-  //efecto para actualizar el currentObject
   useEffect(() => {
-    // Actualizamos currentObject cuando currentIndex cambia
     if (data.length > 0 && currentIndex < data.length) {
       setCurrentObject(data[currentIndex]);
     }
   }, [currentIndex, data]);
-  // Actualiza el tiempo restante en función del intervalo actual
+
   useEffect(() => {
     if (data.length > 0 && currentIndex < data.length) {
       timeDownRef.current =
@@ -51,7 +56,6 @@ const CountDown = () => {
     }
   }, [currentIndex, data]);
 
-  // Efecto que maneja el intervalo del temporizador
   useEffect(() => {
     const tick = () => {
       if (!isPaused && timeDownRef.current > 0) {
@@ -59,7 +63,13 @@ const CountDown = () => {
         setDisplayTime(timeDownRef.current); // Actualiza el display
       } else if (timeDownRef.current <= 0) {
         clearInterval(intervalRef.current); // Detiene el temporizador cuando llega a cero
-        setShowAd(true); // Muestra el anuncio
+        // Determina qué tipo de modal mostrar
+        if (currentObject?.totalTime) {
+          showModalWithTimeout("totalTime");
+        } else if (currentObject?.rest) {
+          showModalWithTimeout("rest");
+        }
+        // setShowAd(true); // Muestra el anuncio
       }
     };
 
@@ -68,23 +78,21 @@ const CountDown = () => {
     }
 
     return () => clearInterval(intervalRef.current); // Limpia el intervalo al desmontar o actualizar
-  }, [isPaused, currentIndex, data]);
+  }, [isPaused, currentIndex, data, intervalRef.current]);
 
-  // Maneja el anuncio
-  useEffect(() => {
-    if (showAd) {
-      const adTimer = setTimeout(() => {
-        setShowAd(false); // Oculta el anuncio después de 2 segundos
-        if (currentIndex < data.length - 1) {
-          setCurrentIndex((prevIndex) => prevIndex + 1); // Cambia al siguiente intervalo solo una vez
-        }
-      }, 2000); // Duración del anuncio
+  // useEffect(() => {
+  //   if (showAd) {
+  //     const adTimer = setTimeout(() => {
+  //       setShowAd(false); // Oculta el anuncio después de 2 segundos
+  //       if (currentIndex < data.length - 1) {
+  //         setCurrentIndex((prevIndex) => prevIndex + 1); // Cambia al siguiente intervalo solo una vez
+  //       }
+  //     }, 2000); // Duración del anuncio
 
-      return () => clearTimeout(adTimer);
-    }
-  }, [showAd, currentIndex, data.length]);
+  //     return () => clearTimeout(adTimer);
+  //   }
+  // }, [showAd, currentIndex, data.length]);
 
-  // Formatear el tiempo para mostrarlo en formato legible
   const formatTime = (segundos) => {
     const horas = Math.floor(segundos / 3600);
     const minutos = Math.floor((segundos % 3600) / 60);
@@ -95,26 +103,55 @@ const CountDown = () => {
     }s`;
   };
 
-  // Alterna entre pausar y reanudar el temporizador
   const togglePause = () => {
     setIsPaused((prev) => !prev);
   };
 
   const handleStop = () => {
-    setShowModal(true); // Muestra el modal de confirmación
+    setShowModalStop(true); // Muestra el modal de confirmación
   };
 
-  // Lógica para detener y regresar a la pantalla principal
+  const showModalWithTimeout = (type) => {
+    setModalContentType(type); // Define el tipo de modal
+    setShowModal(true); // Muestra el modal
+    setIsPaused(true); // Pausa el temporizador
+    if (currentIndex < data.length - 1) {
+      timeoutRef.current = setTimeout(() => {
+        closeModal(); // Cierra el modal después de 10 segundos
+      }, 10000); // 10 segundos
+    } else {
+      timeoutRef.current = setTimeout(() => {
+        closeModal();
+      }, 10000); // 10 segundos
+    }
+  };
+
+  const closeModal = () => {
+    setShowModalStop(false);
+    setShowModal(false);
+    clearTimeout(timeoutRef.current); // Limpia el timeout
+
+    // Si no estamos en el último intervalo, avanzamos
+    if (currentIndex < data.length - 1) {
+      setIsPaused(false); // Reanuda el temporizador
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+    } else {
+      return;
+    }
+  };
+
   const confirmStop = () => {
     setIsStopped(true); // Detiene el temporizador
     clearInterval(intervalRef.current); // Limpia el intervalo
-    setShowModal(false); // Oculta el modal
+    setShowModalStop(false); // Oculta el modal
+    setShowModal(false);
     router.replace("/");
   };
 
   const cancelStop = () => {
-    setShowModal(false); // Cancela el detener, oculta el modal
+    setShowModalStop(false); // Cancela el detener, oculta el modal
   };
+
   return (
     <View>
       {showAd ? (
@@ -142,8 +179,8 @@ const CountDown = () => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={showModal}
-        onRequestClose={() => setShowModal(false)} // Manejo para cerrar modal
+        visible={showModalStop}
+        onRequestClose={() => setShowModalStop(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -152,6 +189,61 @@ const CountDown = () => {
             <Button onPressFn={cancelStop} title="Cancelar">
               Cancelar
             </Button>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de fin de trabajo */}
+      {/* <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showWorkCompleteModal}
+          onRequestClose={() => setShowWorkCompleteModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text>¡Has completado el tiempo de trabajo!</Text>
+              <Button onPressFn={() => setShowWorkCompleteModal(false)}>
+                Cerrar
+              </Button>
+            </View>
+          </View>
+        </Modal> */}
+
+      {/* Modal de fin de descanso */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showModal}
+        onRequestClose={() => {
+          clearTimeout(timeoutRef.current); // Limpia el timeout si el usuario cierra el modal manualmente
+          setShowModal(false);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {/* Mostramos contenido dinámico según modalContentType */}
+            {modalContentType === "stop" ? (
+              <>
+                <Text>
+                  ¿Estás seguro de que quieres detener el temporizador?
+                </Text>
+                <Button onPressFn={confirmStop}>Sí, detener</Button>
+                <Button onPressFn={cancelStop} title="Cancelar">
+                  Cancelar
+                </Button>
+              </>
+            ) : modalContentType === "totalTime" ? (
+              <>
+                <Text>El tiempo de trabajo ha terminado.</Text>
+                <Button onPressFn={closeModal}>Cerrar</Button>
+              </>
+            ) : modalContentType === "rest" ? (
+              <>
+                <Text>El tiempo de descanso ha terminado.</Text>
+                <Button onPressFn={closeModal}>Cerrar</Button>
+              </>
+            ) : null}
           </View>
         </View>
       </Modal>
