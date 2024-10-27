@@ -1,7 +1,7 @@
 {
   "expo": {
     "jsEngine": "hermes",
-    "name": "Strongest-pomodoro",
+    "name": "Strongest Pomodoro",
     "slug": "Strongest-pomodoro",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,18 +18,26 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/play_store_512.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.Strongestpomodoro"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/1024.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f912fb75-5fb4-4219-a9f0-fb9880567206"
+      }
     }
   }
 }
